@@ -15,6 +15,7 @@ void Piece::init(int(&tilemap)[10][20]) {
 	int pick = rand() % 7 + 2;
 	pieceType = pick;
 
+	Occupying = {};
 	switch (pick)
 	{
 	case 5://L
@@ -59,10 +60,6 @@ void Piece::init(int(&tilemap)[10][20]) {
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 4, 2 });
 		Occupying.push_back({ 4, 3 });
-		tilemap[4][0] = 3;
-		tilemap[4][1] = 3;
-		tilemap[4][2] = 3;
-		tilemap[4][3] = 3;
 		break;
 	default:
 		break;
@@ -79,4 +76,23 @@ void Piece::manifest(int(&tilemap)[10][20]) {
 	for (std::vector<int> tile : Occupying) {
 		tilemap[tile.at(0)][tile.at(1)] = pieceType;
 	}
+}
+
+void Piece::movedown(int(&tilemap)[10][20]) {
+	for (std::vector<int> tile : Occupying) {
+		if (tile.at(1) + 1 >=20 || (tilemap[tile.at(0)][tile.at(1) + 1] != 1 && tilemap[tile.at(0)][tile.at(1) + 1] != pieceType)) {
+			this->init(tilemap);
+			return;
+		}
+	}
+
+	for (std::vector<int> tile : Occupying) {
+		tilemap[tile.at(0)][tile.at(1)] = 1;
+	}
+
+	Occupying.at(0).at(1) = Occupying.at(0).at(1) + 1;
+	Occupying.at(1).at(1) = Occupying.at(1).at(1) + 1;
+	Occupying.at(2).at(1) = Occupying.at(2).at(1) + 1;
+	Occupying.at(3).at(1) = Occupying.at(3).at(1) + 1;
+
 }

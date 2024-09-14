@@ -115,8 +115,6 @@ void Game::handleEvents() {
 				case SDLK_DOWN:
 					newpiece.movedown(tilemap);
 					std::cout << "Down key was pressed" << std::endl;
-					newpiece.manifest(tilemap);
-					
 					break;
 				case SDLK_UP:
 					std::cout << "Up key was pressed" << std::endl;
@@ -149,13 +147,12 @@ void Game::handleEvents() {
 		default:
 			break;
 	}
-
+	newpiece.manifest(tilemap);
 }
 
 void Game::update() {	
-	newpiece.manifest(tilemap);
-	//cnt++;
-
+	//increase time
+	//check if a line is cleared
 }
 
 void Game::render(){
