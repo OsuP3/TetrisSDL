@@ -1,7 +1,9 @@
 #include "Game.hpp"
 
 
-Game::Game() {}
+Game::Game() {
+	std::cout << "im doing something !"<<std::endl;
+}
 
 Game::~Game(){}
 
@@ -107,17 +109,24 @@ void Game::handleEvents() {
 			switch (event.key.keysym.sym)
 			{
 				case SDLK_RIGHT:
+					newpiece.moveside(tilemap, 1);
 					std::cout << "right key was pressed"<<std::endl;
 					break;
 				case SDLK_LEFT:
-					std::cout << "Left key was pressed" << std::endl;
+					newpiece.moveside(tilemap, -1);
+					std::cout << "Left key was pressed" << std::endl;	
 					break;
 				case SDLK_DOWN:
 					newpiece.movedown(tilemap);
 					std::cout << "Down key was pressed" << std::endl;
 					break;
 				case SDLK_UP:
+					newpiece.rotate(tilemap);
 					std::cout << "Up key was pressed" << std::endl;
+					break;
+				case SDLK_SPACE:
+					newpiece.instadrop(tilemap);
+					std::cout << "Space key was pressed" << std::endl;
 					break;
 				default:
 					break;
@@ -150,7 +159,8 @@ void Game::handleEvents() {
 	newpiece.manifest(tilemap);
 }
 
-void Game::update() {	
+void Game::update() {
+
 	//increase time
 	//check if a line is cleared
 }
