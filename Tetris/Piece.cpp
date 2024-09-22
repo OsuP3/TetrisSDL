@@ -187,12 +187,16 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 	}
 }
 
-void Piece::rotate(int(&tilemap)[10][20]) {
+void Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 	std::vector<std::vector<int>> newOrientation = Occupying;
 	int tilenum = 0;
+	int CCW = 0;
+	if (CW_CCW == -1 && orientation == 1) { CCW = 3; }
+	else if (CW_CCW == -1) { CCW = -1; }
+
 	for(int i = 0; i < 4; i++){
-		newOrientation.at(i).at(0) += operations[pieceType - 2][orientation - 1][tilenum][0];
-		newOrientation.at(i).at(1) += operations[pieceType - 2][orientation-1][tilenum][1];
+		newOrientation.at(i).at(0) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][0])*CW_CCW;
+		newOrientation.at(i).at(1) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][1])*CW_CCW;
 		if (newOrientation.at(i).at(0) >= 10 || newOrientation.at(i).at(0) < 0) { return;}
 		if (newOrientation.at(i).at(1) >= 20 || newOrientation.at(i).at(1) < 0) { return;}
 
@@ -202,8 +206,10 @@ void Piece::rotate(int(&tilemap)[10][20]) {
 		for (std::vector<int> tile : Occupying) {
 			tilemap[tile.at(0)][tile.at(1)] = 1;
 		}
-		if (orientation == 4) { orientation = 1; }
-		else { orientation++;}
+		if (orientation == 4 && CW_CCW == 1) { orientation = 1; }
+		else if (orientation == 1 && CW_CCW == -1) { orientation = 4; }
+		else { orientation += CW_CCW; }
+		
 	Occupying = newOrientation;
 	manifest(tilemap);
 }

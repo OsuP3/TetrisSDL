@@ -18,7 +18,7 @@ public:
 	void manifest(int(&tilemap)[10][20]);
 	void checkclear(int(&tilemap)[10][20]);
 	void instadrop(int(&tilemap)[10][20]);
-	void rotate(int(&tilemap)[10][20]);
+	void rotate(int(&tilemap)[10][20], int CW_CCW);
 
 
 private:

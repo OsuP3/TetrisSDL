@@ -121,8 +121,12 @@ void Game::handleEvents() {
 					std::cout << "Down key was pressed" << std::endl;
 					break;
 				case SDLK_UP:
-					newpiece.rotate(tilemap);
+					newpiece.rotate(tilemap, 1);
 					std::cout << "Up key was pressed" << std::endl;
+					break;
+				case SDLK_z:
+					newpiece.rotate(tilemap, -1);
+					std::cout << "Z key was pressed" << std::endl;
 					break;
 				case SDLK_SPACE:
 					newpiece.instadrop(tilemap);
