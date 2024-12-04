@@ -12,8 +12,6 @@ Piece::Piece() {
 void Piece::init(int(&tilemap)[10][20]) {
 	srand(time(NULL));
 
-	//int lol[2][2] = { {1,2}, {1,3}};
-
 	std::string choices[7] = { "L","J", "Z", "S", "T", "O", "I" };
 
 	pieceType = rand() % 7 + 2;
@@ -189,17 +187,21 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 
 void Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 	std::vector<std::vector<int>> newOrientation = Occupying;
-	int tilenum = 0;
-	int CCW = 0;
+	int tilenum = 0, CCW = 0;
+
 	if (CW_CCW == -1 && orientation == 1) { CCW = 3; }
 	else if (CW_CCW == -1) { CCW = -1; }
 
 	for(int i = 0; i < 4; i++){
-		newOrientation.at(i).at(0) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][0])*CW_CCW;
-		newOrientation.at(i).at(1) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][1])*CW_CCW;
-		if (newOrientation.at(i).at(0) >= 10 || newOrientation.at(i).at(0) < 0) { return;}
-		if (newOrientation.at(i).at(1) >= 20 || newOrientation.at(i).at(1) < 0) { return;}
+		int x = newOrientation.at(i).at(0) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][0])*CW_CCW;
+		int y = newOrientation.at(i).at(1) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][1])*CW_CCW;
 
+		if (newOrientation.at(i).at(0) >= 10 || newOrientation.at(i).at(0) < 0
+		||  newOrientation.at(i).at(1) >= 20 || newOrientation.at(i).at(1) < 0
+		||  (tilemap[x][y] != 1 &&  0) ){
+			std::cout << "bad\n"; 
+			return;
+		}
 		tilenum++;
 	}
 	//remove old piece location & then move to new location
@@ -213,11 +215,3 @@ void Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 	Occupying = newOrientation;
 	manifest(tilemap);
 }
-/*
- 0 1 0 0
- 0 1 0 0
- 0 1 1 0
- 0 0 0 0
-
-
-*/

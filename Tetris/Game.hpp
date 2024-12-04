@@ -5,6 +5,7 @@
 #include "SDL.h"
 #include <iostream>
 #include "Piece.hpp"
+#include <time.h>
 
 class Game
 {
@@ -24,6 +25,7 @@ public:
 	bool running() { return isRunning; }
 
 private:
+	time_t deltaZero;
 	int width, height;
 	bool isRunning;
 	SDL_Surface* tile_map_surface;

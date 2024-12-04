@@ -1,16 +1,15 @@
 #include "Game.hpp"
 
 
-Game::Game() {
-	std::cout << "im doing something !"<<std::endl;
-}
+Game::Game() {}
 
 Game::~Game(){}
 
 void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen) {
-	int flags = 0;
-	this->width = width;
-	this->height = height;
+	int flags       = 0;
+	this->width     = width;
+	this->height    = height;
+	this->deltaZero = time(0);
 	if (fullscreen) { flags = SDL_WINDOW_FULLSCREEN; }
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
@@ -118,6 +117,7 @@ void Game::handleEvents() {
 					break;
 				case SDLK_DOWN:
 					newpiece.movedown(tilemap);
+					deltaZero = time(0);
 					std::cout << "Down key was pressed" << std::endl;
 					break;
 				case SDLK_UP:
@@ -127,6 +127,11 @@ void Game::handleEvents() {
 				case SDLK_z:
 					newpiece.rotate(tilemap, -1);
 					std::cout << "Z key was pressed" << std::endl;
+					break;
+				case SDLK_x:
+					newpiece.rotate(tilemap, -1);
+					newpiece.rotate(tilemap, -1);
+					std::cout << "X key was pressed" << std::endl;
 					break;
 				case SDLK_SPACE:
 					newpiece.instadrop(tilemap);
@@ -164,9 +169,12 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
+	if ((time(0) - deltaZero > 1))
+	{
+		newpiece.movedown(tilemap);
+		deltaZero = time(0);
+	}
 
-	//increase time
-	//check if a line is cleared
 }
 
 void Game::render(){
