@@ -1,2 +1,2 @@
 # Tetris - Game Loop
-# Tetris, In progress, playable but needs more gameplay elements 
+# Tetris, Completed, but has bugs
