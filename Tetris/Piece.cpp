@@ -1,8 +1,4 @@
 #include "Piece.hpp"
-#include <algorithm>
-
-
-
 	
 Piece::Piece() {
 	return;
@@ -11,10 +7,14 @@ Piece::Piece() {
 
 void Piece::init(int(&tilemap)[10][20]) {
 	srand(time(NULL));
-
-	std::string choices[7] = { "L","J", "Z", "S", "T", "O", "I" };
-
-	pieceType = rand() % 7 + 2;
+	shadowOccupying = {};
+	// "L","J", "Z", "S", "T", "O", "I" 
+	if(choicePool.size() == 0)
+		choicePool = { 2 ,3, 4, 5, 6, 7, 8 };
+	
+	int randomPick = rand() % choicePool.size();
+	pieceType = choicePool.at(randomPick);
+	choicePool.erase(choicePool.begin() + randomPick);
 	//pieceType = 5;
 	Occupying = {};
 	switch (pieceType)
@@ -104,7 +104,7 @@ void Piece::checkclear(int(&tilemap)[10][20]) {
 
 void Piece::manifest(int(&tilemap)[10][20]) {
 	for (std::vector<int> tile : Occupying) {
-		tilemap[tile.at(0)][tile.at(1)] = pieceType;
+		tilemap[tile.at(0)][tile.at(1)] = this->pieceType;
 	}
 }
 
@@ -114,7 +114,7 @@ void Piece::movedown(int(&tilemap)[10][20]) {
 			const int x = tile.at(0);
 			const int y = tile.at(1);
 
-			if (y + 1 >= 20 || (tilemap[x][y + 1] != 1 && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
+			if (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
 				checkclear(tilemap);
 				this->init(tilemap);//hits floor -> new piece
 				return;
@@ -141,7 +141,7 @@ void Piece::moveside(int(&tilemap)[10][20], int side) {
 		const int x = tile.at(0);
 		const int y = tile.at(1);
 
-		if ((x + side > 10 && x + side < 0) || (tilemap[x + side][y] != 1 && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x + side, y}) != Occupying.end()))) {//touches wall || (touches not empty tile && touches not user piece)
+		if ((x + side > 10 && x + side < 0) || ((tilemap[x + side][y] != 1 && tilemap[x][y + side] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x + side, y}) != Occupying.end()))) {//touches wall || (touches not empty tile && touches not user piece)
 			std::cout << "Hit wall!" << std::endl;
 			return;
 		}
@@ -165,13 +165,12 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 			const int x = tile.at(0);
 			const int y = tile.at(1);
 
-			if (y + 1 >= 20 || (tilemap[x][y + 1] != 1 && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
+			if (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
 				checkclear(tilemap);
 				this->init(tilemap);//hits floor -> new piece
 				return;
 			}
 		}
-
 		{//remove old piece location & then move to new location
 			for (std::vector<int> tile : Occupying) {
 				tilemap[tile.at(0)][tile.at(1)] = 1;
@@ -185,22 +184,39 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 	}
 }
 
-void Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
+int Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 	std::vector<std::vector<int>> newOrientation = Occupying;
 	int tilenum = 0, CCW = 0;
 
-	if (CW_CCW == -1 && orientation == 1) { CCW = 3; }
+	if (CW_CCW == -1 && orientation == 1) { CCW = 3; }//for "looping around" the rotation matrixes
 	else if (CW_CCW == -1) { CCW = -1; }
 
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 4; i++){ //for each tile the piece occupies
 		int x = newOrientation.at(i).at(0) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][0])*CW_CCW;
 		int y = newOrientation.at(i).at(1) += (operations[pieceType - 2][orientation - 1 + CCW][tilenum][1])*CW_CCW;
 
-		if (newOrientation.at(i).at(0) >= 10 || newOrientation.at(i).at(0) < 0
-		||  newOrientation.at(i).at(1) >= 20 || newOrientation.at(i).at(1) < 0
-		||  (tilemap[x][y] != 1 &&  0) ){
+
+		//need to check you dont hit an already placed piece
+		if(tilemap[x][y] != 1 && tilemap[x][y] != 9)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				if (newOrientation.at(i) == Occupying.at(k))
+				{
+					break;
+				}
+				if (k == 3) 
+				{
+					std::cout << "bad\n";
+					return 0;
+				}
+			}
+		}
+		if (newOrientation.at(i).at(0) >= 10 || newOrientation.at(i).at(0) < 0 //check bounds
+		||  newOrientation.at(i).at(1) >= 20 || newOrientation.at(i).at(1) < 0) 
+		{
 			std::cout << "bad\n"; 
-			return;
+			return 0;
 		}
 		tilenum++;
 	}
@@ -214,4 +230,37 @@ void Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 		
 	Occupying = newOrientation;
 	manifest(tilemap);
+	return 1;
 }
+
+void Piece::updateShadow(int(&tilemap)[10][20])
+{
+	for (std::vector<int> tile : shadowOccupying) {
+		tilemap[tile.at(0)][tile.at(1)] = 1;
+	}
+	this->shadowOccupying = this->Occupying;
+
+	for (int y = 0; y < 20; y++) {
+		for (std::vector<int> tile : shadowOccupying) {
+			const int x = tile.at(0);
+			const int y = tile.at(1);
+
+			if (tilemap[x][y + 1] != 9 && (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(shadowOccupying.begin(), shadowOccupying.end(), std::vector<int> {x, y + 1}) != shadowOccupying.end())))) {//touches floor || (not empty tile && not user piece)
+				for (std::vector<int> tile : shadowOccupying) {
+					tilemap[tile.at(0)][tile.at(1)] = 9;
+				}
+				return;
+			}
+		}
+		{//remove old piece location & then move to new location
+			for (std::vector<int> tile : shadowOccupying) {
+				tilemap[tile.at(0)][tile.at(1)] = 1;
+			}
+			shadowOccupying.at(0).at(1) = shadowOccupying.at(0).at(1) + 1;
+			shadowOccupying.at(1).at(1) = shadowOccupying.at(1).at(1) + 1;
+			shadowOccupying.at(2).at(1) = shadowOccupying.at(2).at(1) + 1;
+			shadowOccupying.at(3).at(1) = shadowOccupying.at(3).at(1) + 1;
+		}
+	}
+}
+

@@ -18,14 +18,16 @@ public:
 	void manifest(int(&tilemap)[10][20]);
 	void checkclear(int(&tilemap)[10][20]);
 	void instadrop(int(&tilemap)[10][20]);
-	void rotate(int(&tilemap)[10][20], int CW_CCW);
-
+	int rotate(int(&tilemap)[10][20], int CW_CCW);
+	void updateShadow(int(&tilemap)[10][20]);
 
 private:
 
 	std::vector<std::vector<int>> Occupying;
+	std::vector<std::vector<int>> shadowOccupying;
 	int pieceType;
 	int orientation;
+	std::vector<int> choicePool;
 
 	//operations[piecetype][orientation][tile][tileoperation]      
 	int operations[7][4][4][2] = {
@@ -58,7 +60,7 @@ private:
 			   {{{ 2,  0}, { 1,  1}, { 0, -0}, {-1,  1}},  //o1->o2 done
 				{{ 0,  2}, {-1,  1}, {-0,  0}, {-1, -1}},  //o2->o3 done
 				{{-1,  0}, { 0, -1}, { 1,  0}, { 2, -1}},  //o3->o4 done
-				{{-1, -2}, {-0, -1}, {-1,  0}, {-2,  1}}}, //o4->o1 done
+				{{-1, -2}, {-0, -1}, {-1,  0}, { 0,  1}}}, //o4->o1 done
 		/////////////1/////////2/////////3/////////4//////////////////////////////J[6]
 			   {{{ 1, -1}, {-0, -2}, {-1, -1}, {-2,  0}},  //o1->o2 done
 				{{ 1,  1}, { 2, -0}, { 1, -1}, {-0, -2}},  //o2->o3 done

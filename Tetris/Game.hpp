@@ -35,7 +35,7 @@ private:
 	int cnt=0;
 	SDL_Rect tile[10][20];
 	int tilemap[10][20];
-	SDL_Rect select_tile1;
+	SDL_Rect select_tile1; //tiles hold piece colors
 	SDL_Rect select_tile2;
 	SDL_Rect select_tile3;
 	SDL_Rect select_tile4;
@@ -43,6 +43,7 @@ private:
 	SDL_Rect select_tile6;
 	SDL_Rect select_tile7;
 	SDL_Rect select_tile8;
+	SDL_Rect select_tile9; // i kinda messed up with the order here but im too lazy to make it consistent
 	Piece newpiece;
 
 

@@ -19,7 +19,6 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 		if (window) {
 			std::cout << "Window created!" << std::endl;
 		}
-
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		tile_map_surface = SDL_LoadBMP("./assets/tile.bmp");
 		if (renderer && tile_map_surface){
@@ -31,7 +30,6 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 					tilemap[x][y] = 1;
 				}
 			}
-
 			for (int x = 0; x < 10; x++) {
 				for (int y = 0; y < 20; y++) {
 					tile[x][y].x = x * 32;
@@ -81,6 +79,10 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 			select_tile8.w = 32;
 			select_tile8.h = 32;
 
+			select_tile9.x = 128;
+			select_tile9.y = 0;
+			select_tile9.w = 32;
+			select_tile9.h = 32;
 
 			newpiece.init(tilemap);
 
@@ -92,6 +94,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	else {
 		isRunning = false;
 	}
+	std::cout << "Initiated.\n";
 }
 
 void Game::handleEvents() {
@@ -103,7 +106,6 @@ void Game::handleEvents() {
 		case SDL_QUIT:
 			isRunning = false;
 			break;
-
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym)
 			{
@@ -129,8 +131,8 @@ void Game::handleEvents() {
 					std::cout << "Z key was pressed" << std::endl;
 					break;
 				case SDLK_x:
-					newpiece.rotate(tilemap, -1);
-					newpiece.rotate(tilemap, -1);
+					if(newpiece.rotate(tilemap, -1))
+						newpiece.rotate(tilemap, -1);
 					std::cout << "X key was pressed" << std::endl;
 					break;
 				case SDLK_SPACE:
@@ -165,13 +167,16 @@ void Game::handleEvents() {
 		default:
 			break;
 	}
+	newpiece.updateShadow(tilemap);
 	newpiece.manifest(tilemap);
+
 }
 
 void Game::update() {
 	if ((time(0) - deltaZero > 1))
 	{
 		newpiece.movedown(tilemap);
+		newpiece.updateShadow(tilemap);
 		deltaZero = time(0);
 	}
 
@@ -210,6 +215,9 @@ void Game::render(){
 				break;
 			case 8:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile8, &tile[x][y]);//tile 8 
+				break;
+			case 9:
+				SDL_RenderCopy(renderer, tile_texture, &select_tile9, &tile[x][y]);//tile 9 
 				break;
 			default:
 				break;
