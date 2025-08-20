@@ -46,7 +46,15 @@ private:
 	SDL_Rect select_tile9; // i kinda messed up with the order here but im too lazy to make it consistent
 	Piece newpiece;
 
+};
 
+
+class GameResultException {
+public:
+	GameResultException(std::string result) { this->result = result; };
+	std::string get_result() { return this->result; };
+private:
+	std::string result;
 };
 
 #endif //Game_hpp

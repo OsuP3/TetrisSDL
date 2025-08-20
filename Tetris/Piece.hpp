@@ -7,6 +7,19 @@
 #include <vector>
 #include <algorithm>
 
+enum {// "S","I", "O", "L", "T", "Z", "J"
+	ZERO  =  0,
+	BLANK  = 1,
+	SBLOCK = 2,
+	IBLOCK = 3,
+	OBLOCK = 4,
+	LBLOCK = 5,
+	TBLOCK = 6,
+	ZBLOCK = 7,
+	JBLOCK = 8,
+	SHADOW = 9
+
+};
 
 class Piece {
 public:

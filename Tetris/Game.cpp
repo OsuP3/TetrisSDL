@@ -1,5 +1,5 @@
 #include "Game.hpp"
-
+#include "Piece.hpp"
 
 Game::Game() {}
 
@@ -27,7 +27,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
 			for (int x = 0; x < 10; x++) {
 				for (int y = 0; y < 20; y++) {
-					tilemap[x][y] = 1;
+					tilemap[x][y] = BLANK;
 				}
 			}
 			for (int x = 0; x < 10; x++) {
@@ -192,31 +192,31 @@ void Game::render(){
 		for (int y = 0; y < 20; y++) {
 			switch (tilemap[x][y])
 			{
-			case 1:
+			case BLANK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile1, &tile[x][y]);//tile 1 is an empty cell
 				break;
-			case 2:
+			case SBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile2, &tile[x][y]);//tile 2 
 				break;
-			case 3:
+			case IBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile3, &tile[x][y]);//tile 3
 				break;
-			case 4:
+			case OBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile4, &tile[x][y]);//tile 4 
 				break;
-			case 5:
+			case LBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile5, &tile[x][y]);//tile 5 
 				break;
-			case 6:
+			case TBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile6, &tile[x][y]);//tile 6 
 				break;
-			case 7:
+			case ZBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile7, &tile[x][y]);//tile 7 
 				break;
-			case 8:
+			case JBLOCK:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile8, &tile[x][y]);//tile 8 
 				break;
-			case 9:
+			case SHADOW:
 				SDL_RenderCopy(renderer, tile_texture, &select_tile9, &tile[x][y]);//tile 9 
 				break;
 			default:

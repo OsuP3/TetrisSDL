@@ -1,5 +1,6 @@
 #include "Piece.hpp"
-	
+#include "Game.hpp"	
+
 Piece::Piece() {
 	return;
 }
@@ -8,57 +9,57 @@ Piece::Piece() {
 void Piece::init(int(&tilemap)[10][20]) {
 	srand(time(NULL));
 	shadowOccupying = {};
-	// "L","J", "Z", "S", "T", "O", "I" 
+	// "S","I", "O", "L", "T", "Z", "J" 
 	if(choicePool.size() == 0)
-		choicePool = { 2 ,3, 4, 5, 6, 7, 8 };
+		choicePool = { SBLOCK ,IBLOCK, OBLOCK, LBLOCK, TBLOCK, ZBLOCK, JBLOCK };
 	
 	int randomPick = rand() % choicePool.size();
 	pieceType = choicePool.at(randomPick);
 	choicePool.erase(choicePool.begin() + randomPick);
-	//pieceType = 5;
+
 	Occupying = {};
 	switch (pieceType)
 	{
-	case 2://S
+	case SBLOCK://S
 		Occupying.push_back({ 5, 0 });
 		Occupying.push_back({ 4, 0 });
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 3, 1 });
 
 		break;
-	case 3://I
+	case IBLOCK://I
 		Occupying.push_back({ 3, 0 });
 		Occupying.push_back({ 4, 0 });
 		Occupying.push_back({ 5, 0 });
 		Occupying.push_back({ 6, 0 });
 
 		break;
-	case 4://O
+	case OBLOCK://O
 		Occupying.push_back({ 4, 0 });
 		Occupying.push_back({ 5, 0 });
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 5, 1 });
 
 		break;
-	case 5://L
+	case LBLOCK://L
 		Occupying.push_back({ 3, 1 });
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 5, 1 });
 		Occupying.push_back({ 5, 0 });
 		break;
-	case 6://T
+	case TBLOCK://T
 		Occupying.push_back({ 4, 0 });
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 5, 1 });
 		Occupying.push_back({ 3, 1 });
 		break;
-	case 7://Z
+	case ZBLOCK://Z
 		Occupying.push_back({ 3, 0 });
 		Occupying.push_back({ 4, 0 });
 		Occupying.push_back({ 4, 1 });
 		Occupying.push_back({ 5, 1 });
 		break;
-	case 8://J
+	case JBLOCK://J
 		Occupying.push_back({ 3, 0 });
 		Occupying.push_back({ 3, 1 });
 		Occupying.push_back({ 4, 1 });
@@ -70,8 +71,17 @@ void Piece::init(int(&tilemap)[10][20]) {
 	}
 
 	orientation = 1;
-	manifest(tilemap);
+	for (std::vector<int> tile : Occupying) {
+		const int x = tile.at(0);
+		const int y = tile.at(1);
 
+		if (tilemap[x][y] != BLANK && tilemap[x][y] != SHADOW) {
+			manifest(tilemap);
+			throw new GameResultException{"Lose"};
+		}
+	}
+
+	manifest(tilemap);
 	return;
 }
 
@@ -80,7 +90,7 @@ void Piece::checkclear(int(&tilemap)[10][20]) {
 	for (int y = 0; y < 20; y++) {
 		lineclear = true;
 		for (int x = 0; x < 10; x++) {
-			if (tilemap[x][y] == 1) {//check rows for clears
+			if (tilemap[x][y] == BLANK) {//check rows for clears
 				lineclear = false;
 				break;
 			}
@@ -88,7 +98,7 @@ void Piece::checkclear(int(&tilemap)[10][20]) {
 		if (lineclear) {
 			std::cout << "Line Clear!" << std::endl;
 			for (int x = 0; x < 10; x++) {//clear line
-				tilemap[x][y] = 1;
+				tilemap[x][y] = BLANK;
 
 				for (int y2 = y; y2 > 0; y2--) {//bring column down after clear
 					tilemap[x][y2] = tilemap[x][y2-1];
@@ -114,7 +124,8 @@ void Piece::movedown(int(&tilemap)[10][20]) {
 			const int x = tile.at(0);
 			const int y = tile.at(1);
 
-			if (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
+			if (y + 1 >= 20 || ((tilemap[x][y + 1] != BLANK && tilemap[x][y + 1] != SHADOW) 
+			&& !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
 				checkclear(tilemap);
 				this->init(tilemap);//hits floor -> new piece
 				return;
@@ -123,15 +134,13 @@ void Piece::movedown(int(&tilemap)[10][20]) {
 
 		{//remove old piece location & then move to new location
 			for (std::vector<int> tile : Occupying) {
-				tilemap[tile.at(0)][tile.at(1)] = 1;
+				tilemap[tile.at(0)][tile.at(1)] = BLANK;
 			}
 			Occupying.at(0).at(1) = Occupying.at(0).at(1) + 1;
 			Occupying.at(1).at(1) = Occupying.at(1).at(1) + 1;
 			Occupying.at(2).at(1) = Occupying.at(2).at(1) + 1;
 			Occupying.at(3).at(1) = Occupying.at(3).at(1) + 1;
 		}
-
-	
 
 }
 
@@ -141,7 +150,8 @@ void Piece::moveside(int(&tilemap)[10][20], int side) {
 		const int x = tile.at(0);
 		const int y = tile.at(1);
 
-		if ((x + side > 10 && x + side < 0) || ((tilemap[x + side][y] != 1 && tilemap[x][y + side] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x + side, y}) != Occupying.end()))) {//touches wall || (touches not empty tile && touches not user piece)
+		if ((x + side > 10 && x + side < 0) || ((tilemap[x + side][y] != BLANK && tilemap[x][y + side] != SHADOW) 
+		&& !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x + side, y}) != Occupying.end()))) {//touches wall || (touches not empty tile && touches not user piece)
 			std::cout << "Hit wall!" << std::endl;
 			return;
 		}
@@ -149,7 +159,7 @@ void Piece::moveside(int(&tilemap)[10][20], int side) {
 
 	{//remove old piece location & then move to new location
 		for (std::vector<int> tile : Occupying) {
-			tilemap[tile.at(0)][tile.at(1)] = 1;
+			tilemap[tile.at(0)][tile.at(1)] = BLANK;
 		}
 		Occupying.at(0).at(0) = Occupying.at(0).at(0) + side;
 		Occupying.at(1).at(0) = Occupying.at(1).at(0) + side;
@@ -165,7 +175,8 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 			const int x = tile.at(0);
 			const int y = tile.at(1);
 
-			if (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
+			if (y + 1 >= 20 || ((tilemap[x][y + 1] != BLANK && tilemap[x][y + 1] != SHADOW) 
+			&& !(std::find(Occupying.begin(), Occupying.end(), std::vector<int> {x, y + 1}) != Occupying.end()))) {//touches floor || (not empty tile && not user piece)
 				checkclear(tilemap);
 				this->init(tilemap);//hits floor -> new piece
 				return;
@@ -173,14 +184,14 @@ void Piece::instadrop(int(&tilemap)[10][20]) {
 		}
 		{//remove old piece location & then move to new location
 			for (std::vector<int> tile : Occupying) {
-				tilemap[tile.at(0)][tile.at(1)] = 1;
+				tilemap[tile.at(0)][tile.at(1)] = BLANK;
 			}
 			Occupying.at(0).at(1) = Occupying.at(0).at(1) + 1;
 			Occupying.at(1).at(1) = Occupying.at(1).at(1) + 1;
 			Occupying.at(2).at(1) = Occupying.at(2).at(1) + 1;
 			Occupying.at(3).at(1) = Occupying.at(3).at(1) + 1;
 		}
-		manifest(tilemap);//IMPORTANT!!!!!!!!!
+		manifest(tilemap);
 	}
 }
 
@@ -197,7 +208,7 @@ int Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 
 
 		//need to check you dont hit an already placed piece
-		if(tilemap[x][y] != 1 && tilemap[x][y] != 9)
+		if(tilemap[x][y] != BLANK && tilemap[x][y] != SHADOW)
 		{
 			for (int k = 0; k < 4; k++)
 			{
@@ -222,7 +233,7 @@ int Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 	}
 	//remove old piece location & then move to new location
 		for (std::vector<int> tile : Occupying) {
-			tilemap[tile.at(0)][tile.at(1)] = 1;
+			tilemap[tile.at(0)][tile.at(1)] = BLANK;
 		}
 		if (orientation == 4 && CW_CCW == 1) { orientation = 1; }
 		else if (orientation == 1 && CW_CCW == -1) { orientation = 4; }
@@ -236,7 +247,7 @@ int Piece::rotate(int(&tilemap)[10][20], int CW_CCW) {
 void Piece::updateShadow(int(&tilemap)[10][20])
 {
 	for (std::vector<int> tile : shadowOccupying) {
-		tilemap[tile.at(0)][tile.at(1)] = 1;
+		tilemap[tile.at(0)][tile.at(1)] = BLANK;
 	}
 	this->shadowOccupying = this->Occupying;
 
@@ -245,16 +256,17 @@ void Piece::updateShadow(int(&tilemap)[10][20])
 			const int x = tile.at(0);
 			const int y = tile.at(1);
 
-			if (tilemap[x][y + 1] != 9 && (y + 1 >= 20 || ((tilemap[x][y + 1] != 1 && tilemap[x][y + 1] != 9) && !(std::find(shadowOccupying.begin(), shadowOccupying.end(), std::vector<int> {x, y + 1}) != shadowOccupying.end())))) {//touches floor || (not empty tile && not user piece)
+			if (tilemap[x][y + 1] != SHADOW && (y + 1 >= 20 || ((tilemap[x][y + 1] != BLANK && tilemap[x][y + 1] != SHADOW) 
+			&& !(std::find(shadowOccupying.begin(), shadowOccupying.end(), std::vector<int> {x, y + 1}) != shadowOccupying.end())))) {//touches floor || (not empty tile && not user piece)
 				for (std::vector<int> tile : shadowOccupying) {
-					tilemap[tile.at(0)][tile.at(1)] = 9;
+					tilemap[tile.at(0)][tile.at(1)] = SHADOW;
 				}
 				return;
 			}
 		}
 		{//remove old piece location & then move to new location
 			for (std::vector<int> tile : shadowOccupying) {
-				tilemap[tile.at(0)][tile.at(1)] = 1;
+				tilemap[tile.at(0)][tile.at(1)] = BLANK;
 			}
 			shadowOccupying.at(0).at(1) = shadowOccupying.at(0).at(1) + 1;
 			shadowOccupying.at(1).at(1) = shadowOccupying.at(1).at(1) + 1;
